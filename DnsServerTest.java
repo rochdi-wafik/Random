@@ -1,46 +1,8 @@
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-public class DnsParser {
-
-    public DnsParser DnsParser(){
-        return this;
-    }
-
-    /**
-     * Extract Hostname From DNS Qyery
-     */
-    public String getHostname(byte[] dnsQuery) {
-        int position = 12; // Start after the DNS header (12 bytes)
-        StringBuilder hostnameBuilder = new StringBuilder();
-
-        while (position < dnsQuery.length) {
-            int labelLength = dnsQuery[position];
-
-            if (labelLength == 0) {
-                break; // End of hostname
-            }
-
-            if ((labelLength & 0xC0) == 0xC0) {
-                // Compressed label, jump to the offset specified in the next byte
-                int offset = ((labelLength & 0x3F) << 8) | (dnsQuery[position + 1] & 0xFF);
-                position = offset;
-            } else {
-                // Regular label
-                for (int i = 0; i < labelLength; i++) {
-                    hostnameBuilder.append((char) dnsQuery[position + 1 + i]);
-                }
-                hostnameBuilder.append(".");
-                position += labelLength + 1;
-            }
-        }
-
-        return hostnameBuilder.toString();
-    }
-    
-}
-
-public class Dns {
+public class App {
+public static class Dns {
 
     public String google_ip = "142.251.40.110";
     public String localhost_ip = "127.0.0.1";
@@ -96,12 +58,49 @@ public class Dns {
 
     
 }
+public static class DnsParser {
 
-public class App {
+    public DnsParser DnsParser(){
+        return this;
+    }
+
+    /**
+     * Extract Hostname From DNS Qyery
+     */
+    public String getHostname(byte[] dnsQuery) {
+        int position = 12; // Start after the DNS header (12 bytes)
+        StringBuilder hostnameBuilder = new StringBuilder();
+
+        while (position < dnsQuery.length) {
+            int labelLength = dnsQuery[position];
+
+            if (labelLength == 0) {
+                break; // End of hostname
+            }
+
+            if ((labelLength & 0xC0) == 0xC0) {
+                // Compressed label, jump to the offset specified in the next byte
+                int offset = ((labelLength & 0x3F) << 8) | (dnsQuery[position + 1] & 0xFF);
+                position = offset;
+            } else {
+                // Regular label
+                for (int i = 0; i < labelLength; i++) {
+                    hostnameBuilder.append((char) dnsQuery[position + 1 + i]);
+                }
+                hostnameBuilder.append(".");
+                position += labelLength + 1;
+            }
+        }
+
+        return hostnameBuilder.toString();
+    }
+    
+}
+
+
     public static void main(String[] args) throws Exception {
 
             
-
             Dns dns = new Dns();
             try {
                 dns.start(53);
